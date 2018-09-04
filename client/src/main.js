@@ -2,10 +2,8 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import Buefy from 'buefy'
-import 'buefy/lib/buefy.css'
-
-Vue.use(Buefy, {defaultIconPack: 'fas'});
+import Vuebar from 'vuebar';
+Vue.use(Vuebar);
 
 Vue.config.productionTip = false;
 

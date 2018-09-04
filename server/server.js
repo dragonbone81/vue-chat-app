@@ -4,11 +4,11 @@ const io = require('socket.io')(http);
 
 express.get('/', (req, res) => res.send("Hello World"));
 http.listen(8000, () => console.log("server started"));
-
-io.on('connection', (socket) => {
-    console.log('a user connected');
+const chat = io.of('/chat');
+chat.on('connection', (socket) => {
     socket.on('message', (message) => {
-        io.emit('message', message);
+        socket.broadcast.emit('message', message);
+        socket.emit('message_received');
         console.log(message);
     });
 });

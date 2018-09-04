@@ -1,23 +1,19 @@
 <template>
-    <div class="home section">
-        <div class="container is-fluid">
-            <div class="columns is-centered">
-                <div class="column has-text-centered chat-box">
-                    <h2 class="title is-3">Chat</h2>
-                    <div class="messages content has-text-left">
-                        <ul>
-                            <li v-for="message in messages">{{message}}</li>
-                        </ul>
-                    </div>
-                    <div class="message-input">
-                        <div class="field has-addons">
-                            <b-input v-model="message" class="is-expanded" placeholder="Type anything..."/>
-                            <div class="control">
-                                <button v-on:click="sendMessage" class="button is-info">
-                                    Send
-                                </button>
-                            </div>
-                        </div>
+    <div class="body">
+        <div class="sidebar">hello</div>
+        <div class="chat-box">
+            <div ref="messages" class="messages">
+                <div class="messages-inside">
+                    <div :key="index" v-for="(message, index) in messages">{{message}}</div>
+                </div>
+            </div>
+            <div class="message-input">
+                <div class="input-group mb-3">
+                    <input v-on:keyup.enter="sendMessage" v-model="message" type="text" class="form-control"
+                           placeholder="Type anything..."
+                           aria-label="Type the message">
+                    <div class="input-group-append">
+                        <button v-on:click="sendMessage" class="btn btn-outline-success" type="button">Send</button>
                     </div>
                 </div>
             </div>
@@ -26,22 +22,27 @@
 </template>
 
 <script>
-    import BInput from "buefy/src/components/input/Input";
     import io from 'socket.io-client';
 
     export default {
         name: 'home',
-        components: {
-            BInput,
-        },
+        components: {},
         mounted() {
             this.socket.on('message', data => {
                 this.messages.push(data.message);
+                if (this.$refs.messages !== undefined && this.$refs.messages !== null)
+                    this.$refs.messages.scrollTop = 9999999;
+            });
+            this.socket.on('message_received', () => {
+                this.messages.push(this.message);
+                this.message = "";
+                if (this.$refs.messages !== undefined && this.$refs.messages !== null)
+                    this.$refs.messages.scrollTop = 9999999;
             })
         },
         data() {
             return {
-                socket: io('localhost:8000'),
+                socket: io('localhost:8000/chat'),
                 message: '',
                 messages: [],
             }
@@ -50,30 +51,53 @@
             sendMessage() {
                 if (this.message) {
                     this.socket.emit('message', {user: 'user1', message: this.message});
-                    this.message = '';
                 }
             }
         }
     }
 </script>
 <style scoped>
+    .body {
+        display: flex;
+        flex-direction: row;
+        flex-grow: 1;
+        height: 100vh;
+    }
+
     .chat-box {
-        border: 2px solid green;
-        max-width: 800px;
-        height: 600px;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        /*padding: 20px;*/
     }
 
     .messages {
-        height: 450px;
+        height: 100%;
         overflow-y: auto;
         max-height: 100%;
     }
 
+    .messages::-webkit-scrollbar {
+        width: 6px;
+        background-color: #ffffff;
+    }
+
+    .messages::-webkit-scrollbar-thumb {
+        background-color: #989898;
+        border-radius: 5px;
+        height: 100px;
+    }
+
+    .messages-inside {
+        padding: 20px;
+    }
+
+    .sidebar {
+        background-color: #00a9a9;
+        width: 260px;
+    }
+
     .message-input {
-        /*position: absolute;*/
-        /*bottom: 20px;*/
-        /*width: 800%;*/
-        /*padding-top: 30px;*/
-        /*margin-top: 300px;*/
+        padding: 20px;
     }
 </style>
